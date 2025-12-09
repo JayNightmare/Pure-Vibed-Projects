@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply bg-[#05010A] text-[#F9F5FF] overflow-x-hidden;
+        font-family: 'Courier New', Courier, monospace;
+    }
+}
+
+@layer utilities {
+    .text-shadow-neon {
+        text-shadow: 0 0 5px rgba(255, 23, 68, 0.5), 0 0 10px rgba(255, 23, 68, 0.3);
+    }
+
+    .box-shadow-neon {
+        box-shadow: 0 0 5px rgba(255, 23, 68, 0.5), 0 0 10px rgba(255, 23, 68, 0.3);
+    }
+
+    .scanline {
+        background: linear-gradient(to bottom,
+                rgba(255, 255, 255, 0),
+                rgba(255, 255, 255, 0) 50%,
+                rgba(0, 0, 0, 0.2) 50%,
+                rgba(0, 0, 0, 0.2));
+        background-size: 100% 4px;
+    }
+
+    .crt-flicker {
+        animation: flicker 0.15s infinite;
+    }
+
+    @keyframes flicker {
+        0% {
+            opacity: 0.97;
+        }
+
+        5% {
+            opacity: 0.95;
+        }
+
+        10% {
+            opacity: 0.9;
+        }
+
+        15% {
+            opacity: 0.95;
+        }
+
+        20% {
+            opacity: 0.99;
+        }
+
+        25% {
+            opacity: 0.95;
+        }
+
+        30% {
+            opacity: 0.9;
+        }
+
+        35% {
+            opacity: 0.96;
+        }
+
+        40% {
+            opacity: 0.98;
+        }
+
+        45% {
+            opacity: 0.95;
+        }
+
+        50% {
+            opacity: 0.99;
+        }
+
+        55% {
+            opacity: 0.93;
+        }
+
+        60% {
+            opacity: 0.9;
+        }
+
+        65% {
+            opacity: 0.96;
+        }
+
+        70% {
+            opacity: 1;
+        }
+
+        75% {
+            opacity: 0.97;
+        }
+
+        80% {
+            opacity: 0.95;
+        }
+
+        85% {
+            opacity: 0.92;
+        }
+
+        90% {
+            opacity: 0.98;
+        }
+
+        95% {
+            opacity: 0.99;
+        }
+
+        100% {
+            opacity: 0.94;
+        }
+    }
+}
