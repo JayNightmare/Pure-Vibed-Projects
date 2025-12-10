@@ -83,14 +83,18 @@ main {
 
 /* Markdown Content Styling */
 main h1,
-main h2,
 main h3,
 main h4,
 main h5,
 main h6 {
     color: var(--accent-color);
-    margin-top: 1.5em;
-    margin-bottom: 0.5em;
+    margin-top: 0;
+    margin-bottom: 1.5em;
+}
+
+main h2 {
+    margin-top: 1em;
+    margin-bottom: 1.5em;
 }
 
 main a {
