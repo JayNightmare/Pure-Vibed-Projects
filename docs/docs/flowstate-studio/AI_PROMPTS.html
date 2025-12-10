@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI_PROMPTS</title>
+    <link rel="stylesheet" href="/css/style.css"> 
+    <!-- Note: href="/css/style.css" assumes server root. For local files, we might need relative paths like ../css/style.css -->
+</head>
+<body>
+    <header>
+        <h1>Project Documentation</h1>
+    </header>
+    <div class="container">
+        <nav>
+            <ul>
+                <li><a href="/docs\flowstate-studio\architecture.html">architecture</a></li>
+<li><a href="/docs\flowstate-studio\AI_PROMPTS.html">AI_PROMPTS</a></li>
+            </ul>
+        </nav>
+        <main>
+            <h1>Vibathon AI Agent Prompt Cheat Sheet</h1>
+<h2>How to use this sheet</h2>
+<ul>
+<li>Treat the AI like your <strong>only developer</strong>.</li>
+<li>You:
+<ul>
+<li>Define goals, constraints, stack, and vibes.</li>
+<li>Keep it honest when it messes up (“this doesn’t run, fix X”).</li>
+</ul>
+</li>
+<li>It:
+<ul>
+<li>Writes <em>all</em> code, tests, docs, etc.</li>
+</ul>
+</li>
+</ul>
+<p>Use these prompts in order:</p>
+<ol>
+<li>Project brief</li>
+<li>Architecture + file plan</li>
+<li>Scaffolding + core features</li>
+<li>Styling &amp; “vibes”</li>
+<li>Testing &amp; refactors</li>
+<li>Deployment / polish</li>
+</ol>
+<hr>
+<h2>1. Project Kickoff – High-level brief</h2>
+<p>Use this to define the whole app in one go.</p>
+<pre><code class="language-text">You are a senior full-stack engineer. You will be the only one writing code – assume I will just copy-paste what you give me with no manual edits.
+
+I want to build a small hackathon app called [APP_NAME].
+
+Goal:
+[1–3 sentences describing what the app does and why it’s fun/useful.]
+
+Tech stack:
+- Frontend: [e.g. React + Vite + TypeScript + Tailwind]
+- Backend: [e.g. Node.js + Express] OR [serverless functions] OR [no backend, just local state]
+- Data: [e.g. local storage] OR [mock JSON] OR [simple in-memory array] (keep it simple)
+- Time limit: This is for a hackathon, so prioritize shipping over perfection.
+
+Design &amp; vibe:
+- Style keywords: [e.g. retro VHS, neon, hacker terminal, anime UI, etc.]
+- Focus on a clean but playful UI that looks impressive with minimal code.
+
+Constraints:
+- No placeholder “…code continues” – always give complete, runnable files.
+- If something is too long for one message, split into “Part 1/2/3” and make clear which file each part belongs to.
+- Avoid overengineering. Small, readable components. Clear function and file names.
+
+Tasks:
+1. Rephrase and tighten my idea in 3–5 bullet points.
+2. Propose 2–3 small scope levels:
+   - “Tiny MVP (fast)”
+   - “Medium (still doable in a day)”
+   - “Stretch goals (if time)”
+3. Recommend a stack choice for this hackathon and explain why.
+4. Suggest a core feature list for the MVP, tailored to that stack.
+</code></pre>
+<hr>
+<h2>2. Architecture &amp; File Plan</h2>
+<p>Once the idea is settled, get a <strong>concrete file structure</strong> next.</p>
+<pre><code class="language-text">Using the agreed idea and stack, design the architecture and file structure.
+
+Requirements:
+- Keep it realistic for a 1–2 day hackathon.
+- Prefer a single-page app with a clear entry point.
+- Use a simple, flat-ish folder structure.
+
+Output:
+1. A high-level architecture summary (2–3 short paragraphs max).
+2. A file tree showing all key files, for example:
+
+   /[project-root]
+   ├─ package.json
+   ├─ index.html
+   ├─ src/
+   │  ├─ main.tsx
+   │  ├─ App.tsx
+   │  ├─ components/
+   │  ├─ pages/
+   │  ├─ hooks/
+   │  └─ styles/
+
+3. For each main file, give:
+   - 1–2 sentences on its responsibility.
+   - Any important assumptions or patterns (e.g. “use React Context for global state”).
+
+Do NOT write the full code yet, just the plan.
+Be explicit about anything that might be tricky or risky under hackathon time pressure.
+</code></pre>
+<hr>
+<h2>3. Scaffolding the Project</h2>
+<p>Now get it to generate the <strong>initial codebase</strong>.</p>
+<pre><code class="language-text">Now generate the initial project scaffolding based on the file plan.
+
+Rules:
+- Output full file contents, one file at a time, in this order:
+  1. package.json
+  2. index.html (if applicable)
+  3. main entry file
+  4. App component
+  5. Any minimal routing or layout components
+- Include any necessary imports and exports so that the project will run after dependencies are installed.
+- Include minimal but working styling hooks (e.g. Tailwind setup or a basic CSS file).
+
+For each file:
+- Start with a clear filename heading like: 
+  === File: package.json ===
+- Then give the complete content.
+- Don’t skip or truncate any parts.
+- Avoid TODOs unless they are purely cosmetic.
+
+Assume I will:
+- Create files exactly with these names.
+- Copy each snippet into the right file and run it.
+</code></pre>
+<p>If you want it to generate the <strong>CLI commands</strong> too:</p>
+<pre><code class="language-text">Before generating code, give me the exact shell commands to create and run this project (e.g. Vite/Next.js create command, npm install, npm run dev).
+Keep it minimal and target a typical Node.js + npm setup.
+</code></pre>
+<hr>
+<h2>4. Implementing Core Features (Iterative)</h2>
+<p>For each feature, you can use a pattern like this.</p>
+<pre><code class="language-text">Next, implement this feature:
+
+[Describe feature, e.g.
+“Users can create a new vibe entry with a title, mood (1–5), and short description. Entries appear in a list below, sorted by newest first. Data is persisted in localStorage.”]
+
+Context:
+- Current architecture and stack: [paste brief summary or remind model].
+- Files that should change: [e.g. App.tsx, components/VibeForm.tsx, components/VibeList.tsx, utils/storage.ts].
+- Data should be stored in: [localStorage / in-memory / etc.].
+
+Requirements:
+- Show only the files that need to be added or modified.
+- For each changed file, show the full file content, not a diff.
+- Ensure types compile if using TypeScript.
+- Ensure the feature works end-to-end: I should be able to run the app and use it with no placeholder code.
+
+At the end, summarise:
+- What files were touched.
+- Any assumptions made.
+</code></pre>
+<hr>
+<h2>5. Styling &amp; “Vibes” Pass</h2>
+<p>Once the core logic works, make it <strong>look</strong> like a Vibathon project.</p>
+<pre><code class="language-text">Now do a styling and “vibes” pass on the existing UI.
+
+Vibe:
+- [e.g. Retro VHS, glitchy transitions, scanlines, neon gradients, minimalist hacker dashboard, anime HUD, etc.]
+
+Constraints:
+- Do NOT completely rewrite the structure. Keep the component hierarchy mostly the same.
+- Use [Tailwind classes / a single CSS file / styled-components] consistently.
+- Prioritise:
+  - Clean layout and spacing
+  - Consistent fonts and colors
+  - A striking hero section or main screen
+  - Subtle animations or transitions where it’s easy
+
+Instructions:
+1. Propose a color palette and key style tokens (font choices, spacing scale, border radius, shadows).
+2. Update the relevant components to apply these styles.
+3. If using CSS, show the full CSS file. If using Tailwind, show any config changes if needed.
+
+End with:
+- A 3–5 bullet “visual identity” summary (so I can pitch it to judges).
+</code></pre>
+<hr>
+<h2>6. Testing &amp; Quick Safety Nets</h2>
+<p>Even in a hackathon, you can look fancy with <em>some</em> tests or checks.</p>
+<pre><code class="language-text">Add minimal but meaningful tests or sanity checks for this project.
+
+Context:
+- Tech stack: [e.g. React + Vite + TypeScript, no backend]
+- Testing preference: [e.g. Vitest + React Testing Library] OR [basic unit tests only] OR [just add runtime guards and error boundaries].
+
+Requirements:
+- Identify 2–3 critical pieces of logic or components that would benefit from tests.
+- Create:
+  - One test file per chosen area (name them explicitly).
+  - Simple tests that can realistically pass in a hackathon (no huge setup).
+- Show exact commands to run the tests.
+
+Also:
+- Add any lightweight runtime safety nets you recommend (e.g. error boundary, input validation, defensive checks).
+- Don’t introduce heavy dependencies that aren’t worth it for a small project.
+</code></pre>
+<hr>
+<h2>7. Refactor / Cleanup Prompt</h2>
+<p>Once it “works”, do a <strong>quality pass</strong> without exploding the scope.</p>
+<pre><code class="language-text">Now perform a cleanup and refactor pass.
+
+Goals:
+- Improve readability and structure without changing features.
+- Remove dead code, console.logs (unless explicitly useful), and unused imports.
+- Extract tiny utility functions where it clearly improves clarity.
+- Ensure file responsibilities are clear and not bloated.
+
+Instructions:
+1. Scan the code (based on the files you’ve generated so far) and list:
+   - 3–5 specific refactor opportunities.
+2. Apply only the highest-impact refactors that are safe under hackathon time pressure.
+3. For each affected file, output the full updated file.
+
+Constraints:
+- Don’t introduce new libraries at this stage.
+- Don’t start a massive architecture change.
+- Explain briefly why each refactor is beneficial.
+</code></pre>
+<hr>
+<h2>8. Debugging Prompt (when something breaks)</h2>
+<p>When it inevitably explodes:</p>
+<pre><code class="language-text">The current code is throwing an error.
+
+[Paste error message + relevant file(s).]
+
+Context:
+- Stack: [stack]
+- I copied the code exactly as you provided.
+
+Tasks:
+1. Explain clearly what is causing this error.
+2. Propose the minimal fix.
+3. Output the full corrected version of any files that must change.
+4. If the error suggests a deeper issue with the architecture or earlier assumptions, call that out, but keep the fix scoped so we can ship.
+</code></pre>
+<hr>
+<h2>9. README / Pitch Prompt</h2>
+<p>Get it to write a <strong>judge-friendly README</strong> and pitch text.</p>
+<pre><code class="language-text">Write a concise README.md for this project.
+
+Include:
+- Project name and a one-sentence tagline.
+- Short description (what problem it solves or why it’s cool).
+- Tech stack.
+- Features list (bullet points).
+- How to run it locally (exact commands).
+- Known limitations / future ideas (keep it honest but optimistic).
+
+Style:
+- Friendly and clear.
+- Short enough to skim during judging.
+
+Then, write a 30–60 second spoken pitch I can say to judges to explain the app and why it’s a good fit for a “vibe coding / AI-built” hackathon.
+</code></pre>
+<hr>
+<h2>10. Deployment Prompt (optional but nice)</h2>
+<p>If you have time for deployment (e.g. Vercel / Netlify / simple VPS):</p>
+<pre><code class="language-text">Help me deploy this app.
+
+Context:
+- Frontend framework: [React/Vite/Next/etc.]
+- Target hosting: [Vercel / Netlify / GitHub Pages / simple Node server].
+
+Tasks:
+1. Explain the deployment approach step by step.
+2. Give me any necessary config files (e.g. vercel.json, netlify.toml, GitHub Actions workflow) with full content.
+3. Mention any common gotchas for this stack and host (e.g. environment variables, base paths).
+
+Keep instructions short and copy-pasteable.
+</code></pre>
+
+        </main>
+    </div>
+    <footer>
+        <p>Generated by md-to-deploy</p>
+    </footer>
+</body>
+</html>

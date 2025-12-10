@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>architecture</title>
+    <link rel="stylesheet" href="/css/style.css"> 
+    <!-- Note: href="/css/style.css" assumes server root. For local files, we might need relative paths like ../css/style.css -->
+</head>
+<body>
+    <header>
+        <h1>Project Documentation</h1>
+    </header>
+    <div class="container">
+        <nav>
+            <ul>
+                <li><a href="/docs\flowstate-studio\architecture.html">architecture</a></li>
+<li><a href="/docs\flowstate-studio\AI_PROMPTS.html">AI_PROMPTS</a></li>
+            </ul>
+        </nav>
+        <main>
+            <h1>Architecture &amp; File Plan: FlowState Studio</h1>
+<h2>1. High-Level Architecture</h2>
+<p>FlowState Studio will be a <strong>single-page React app</strong> built with <strong>Vite + TypeScript + Tailwind CSS</strong>, running entirely in the browser. All session data (start/end time, activity, mood, soundtrack) is stored in <code>localStorage</code>, so there’s no backend or auth to worry about. The core of the app is a “session state machine”: idle → running → stopped → saved-to-timeline.</p>
+<p>At the UI level, we’ll have a main <strong>AppShell</strong> that wraps everything in a CRT-style, neon-glow frame: the big timer area (“Deck”), a control strip for start/stop, and a scrollable “Vibe Reel” timeline of previous sessions. A lightweight global state (via React context or a top-level state in <code>App.tsx</code>) will manage the current active session and the list of stored sessions, with a small abstraction around <code>localStorage</code> to keep persistence logic clean.</p>
+<p>Styling is handled by <strong>Tailwind</strong> plus a small global CSS layer for CRT scanlines, glow, and glitchy transitions. Components stay small and focused: timer, form, list, list item card, and some reusable “vibe” UI primitives (glowing buttons, badges, panels). This keeps the codebase approachable and hackathon-friendly while still looking visually impressive.</p>
+<h2>2. File &amp; Folder Structure</h2>
+<pre><code class="language-text">flowstate-studio/
+├─ index.html
+├─ package.json
+├─ tsconfig.json
+├─ vite.config.ts
+├─ postcss.config.cjs
+├─ tailwind.config.cjs
+└─ src/
+   ├─ main.tsx
+   ├─ App.tsx
+   ├─ types/
+   │  └─ session.ts
+   ├─ context/
+   │  └─ SessionContext.tsx
+   ├─ components/
+   │  ├─ layout/
+   │  │  └─ AppShell.tsx
+   │  ├─ sessions/
+   │  │  ├─ SessionTimer.tsx
+   │  │  ├─ SessionForm.tsx
+   │  │  ├─ SessionList.tsx
+   │  │  └─ SessionCard.tsx
+   │  └─ ui/
+   │     ├─ GlowButton.tsx
+   │     ├─ VibeBadge.tsx
+   │     └─ Panel.tsx
+   ├─ hooks/
+   │  ├─ useSessionTimer.ts
+   │  └─ useLocalStorage.ts
+   ├─ lib/
+   │  ├─ storage.ts
+   │  └─ time.ts
+   └─ styles/
+      └─ index.css
+</code></pre>
+<h2>3. Responsibilities Per Main File / Folder</h2>
+<h3>Root / Config</h3>
+<ul>
+<li>
+<p><strong><code>index.html</code></strong>
+The base HTML file Vite uses as an entry point. Minimal shell with root <code>&lt;div id=&quot;root&quot;&gt;&lt;/div&gt;</code>, plus any meta tags and a background colour that matches the cyberpunk theme (dark).</p>
+</li>
+<li>
+<p><strong><code>package.json</code></strong>
+Declares dependencies (<code>react</code>, <code>react-dom</code>, <code>typescript</code>, <code>tailwindcss</code>, etc.), scripts (<code>dev</code>, <code>build</code>, <code>preview</code>), and project metadata. This is what you’ll run with <code>npm run dev</code>.</p>
+</li>
+<li>
+<p><strong><code>tsconfig.json</code></strong>
+TypeScript configuration: JSX settings, module resolution, strictness. Keeps the DX nice and prevents common type errors.</p>
+</li>
+<li>
+<p><strong><code>vite.config.ts</code></strong>
+Vite setup for React + TS. Mostly boilerplate, but we can customise <code>base</code> or aliases later if needed.</p>
+</li>
+<li>
+<p><strong><code>postcss.config.cjs</code> &amp; <code>tailwind.config.cjs</code></strong>
+Tailwind and PostCSS configuration. Tailwind config will define the content paths (<code>./index.html</code>, <code>./src/**/*.{ts,tsx}</code>) and optionally extend the theme with neon colours and fonts.</p>
+</li>
+</ul>
+<h3><code>src/main.tsx</code></h3>
+<ul>
+<li>Bootstraps the React app.</li>
+<li>Renders <code>&lt;App /&gt;</code> into <code>#root</code>.</li>
+<li>Wraps <code>&lt;App /&gt;</code> inside any providers, e.g. <code>&lt;SessionProvider&gt;</code> from <code>SessionContext.tsx</code>.</li>
+<li>Imports the global styles: <code>import &quot;./styles/index.css&quot;;</code>.</li>
+</ul>
+<h3><code>src/App.tsx</code></h3>
+<ul>
+<li>Top-level application component.</li>
+<li>Composes the layout:
+<ul>
+<li><code>&lt;AppShell&gt;</code> for the CRT frame.</li>
+<li>Inside: <code>&lt;SessionTimer&gt;</code>, start/stop controls, stats, and the <code>&lt;SessionList&gt;</code>.</li>
+</ul>
+</li>
+<li>Consumes the session context to:
+<ul>
+<li>Show current running session status.</li>
+<li>Pass session actions (start/stop/save/delete) to the relevant components.</li>
+</ul>
+</li>
+<li>This is effectively the “director” of the main screen.</li>
+</ul>
+<h3><code>src/types/session.ts</code></h3>
+<ul>
+<li>Defines TypeScript types and enums for sessions:<pre><code class="language-ts">export type Mood = &quot;FOCUSED&quot; | &quot;CHILL&quot; | &quot;BURNT&quot; | &quot;HYPED&quot;; // etc.
+
+export interface Session {
+  id: string;
+  activity: string;
+  mood: Mood;
+  soundtrack: string;
+  startedAt: string;  // ISO string
+  endedAt: string;    // ISO string
+  durationMs: number;
+}
+</code></pre>
+</li>
+<li>Central place for types so the rest of the app doesn’t drift.</li>
+</ul>
+<h3><code>src/context/SessionContext.tsx</code></h3>
+<ul>
+<li>Provides global state and actions for sessions:
+<ul>
+<li><code>sessions: Session[]</code></li>
+<li><code>currentSessionStart: Date | null</code></li>
+<li><code>startSession(activityHint?)</code></li>
+<li><code>stopSessionAndSave(metadata)</code></li>
+<li><code>deleteSession(id)</code></li>
+</ul>
+</li>
+<li>On mount:
+<ul>
+<li>Hydrates the <code>sessions</code> array from <code>localStorage</code> via <code>lib/storage.ts</code>.</li>
+</ul>
+</li>
+<li>On change:
+<ul>
+<li>Writes updated sessions back to <code>localStorage</code>.</li>
+</ul>
+</li>
+<li>Exposes a <code>useSessions()</code> hook for components to easily consume the state.</li>
+</ul>
+<p>We can keep this fairly small; the heavy lifting for timing lives in <code>useSessionTimer</code>.</p>
+<h3><code>src/components/layout/AppShell.tsx</code></h3>
+<ul>
+<li>Responsible only for the <strong>frame and overall layout</strong>:
+<ul>
+<li>Full-screen flex/grid layout.</li>
+<li>Neon gradient background.</li>
+<li>Overlay for CRT scanlines &amp; subtle vignette.</li>
+</ul>
+</li>
+<li>Slot pattern:
+<ul>
+<li>Might take <code>header</code>, <code>main</code>, <code>sidebar</code> children or just <code>children</code> and apply consistent padding, max-width, etc.</li>
+</ul>
+</li>
+<li>Adds the cosmetic layer: pseudo-elements for scanlines, inner glow around main content.</li>
+</ul>
+<h3><code>src/components/sessions/SessionTimer.tsx</code></h3>
+<ul>
+<li>Displays:
+<ul>
+<li>Large digital timer (HH:MM:SS).</li>
+<li>Current activity or a placeholder (“IDLE”).</li>
+</ul>
+</li>
+<li>Uses <code>useSessionTimer</code> + context:
+<ul>
+<li>When a session is active, it counts up based on <code>currentSessionStart</code>.</li>
+<li>When idle, shows <code>00:00:00</code> or last session duration.</li>
+</ul>
+</li>
+<li>Can include small “status lights” (e.g. green/red LED dot) depending on running vs idle.</li>
+</ul>
+<h3><code>src/components/sessions/SessionForm.tsx</code></h3>
+<ul>
+<li>Appears when the user stops a session (“TERMINATE”).</li>
+<li>Could be a modal or slide-up sheet.</li>
+<li>Fields:
+<ul>
+<li><code>Activity</code> (text)</li>
+<li><code>Mood</code> (select or buttons with emoji like 🔥, 🧘, 💀)</li>
+<li><code>Soundtrack</code> (free text, e.g. “lofi girl #288”)</li>
+</ul>
+</li>
+<li>On submit:
+<ul>
+<li>Calls <code>stopSessionAndSave(metadata)</code> via context.</li>
+<li>Closes itself.</li>
+</ul>
+</li>
+<li>On cancel:
+<ul>
+<li>Optionally discards or asks for confirmation (for hackathon speed, we can just discard).</li>
+</ul>
+</li>
+</ul>
+<h3><code>src/components/sessions/SessionList.tsx</code></h3>
+<ul>
+<li>Takes the <code>sessions</code> array from context.</li>
+<li>Renders them in <strong>reverse chronological order</strong> (newest first).</li>
+<li>Wraps each session in a <code>&lt;SessionCard&gt;</code> for consistent styling.</li>
+<li>Optionally groups by date (“Today”, “Yesterday”).</li>
+</ul>
+<h3><code>src/components/sessions/SessionCard.tsx</code></h3>
+<ul>
+<li>Renders one session’s information in a stylised “VHS label” / cyberpunk card:
+<ul>
+<li>Activity name, mood emoji, soundtrack.</li>
+<li>Time range + duration (formatted via <code>lib/time.ts</code>).</li>
+</ul>
+</li>
+<li>Visual elements:
+<ul>
+<li>Coloured mood badge via <code>&lt;VibeBadge&gt;</code>.</li>
+<li>Subtle hover glow, scanline overlay, maybe a fake “tape ID” or hex ID.</li>
+</ul>
+</li>
+<li>Includes a small delete icon/button:
+<ul>
+<li>Calls delete from context.</li>
+</ul>
+</li>
+</ul>
+<h3><code>src/components/ui/GlowButton.tsx</code></h3>
+<ul>
+<li>Reusable button with neon/glow styling using Tailwind classes.</li>
+<li>Props: <code>variant</code>, <code>size</code>, <code>onClick</code>, <code>children</code>, <code>disabled</code>.</li>
+<li>Used for “INITIATE”, “TERMINATE”, maybe “Edit”, “Delete”, etc. to keep visual consistency.</li>
+</ul>
+<h3><code>src/components/ui/VibeBadge.tsx</code></h3>
+<ul>
+<li>Displays a mood in a compact, visually distinct way:
+<ul>
+<li>e.g. 🔥 FOCUSED, 🧘 CHILL, 💀 BURNT.</li>
+</ul>
+</li>
+<li>Tailwind classes for background glow and border.</li>
+<li>Keeps mood rendering logic in one place.</li>
+</ul>
+<h3><code>src/components/ui/Panel.tsx</code></h3>
+<ul>
+<li>Generic container with:
+<ul>
+<li>Semi-transparent background for glassy look.</li>
+<li>Borders / inner shadows appropriate for CRT feel.</li>
+</ul>
+</li>
+<li>Used for grouping timer, stats, and session list.</li>
+</ul>
+<h3><code>src/hooks/useSessionTimer.ts</code></h3>
+<ul>
+<li>Encapsulates logic for deriving elapsed time:
+<ul>
+<li>Takes <code>currentSessionStart</code> (from context).</li>
+<li>Internally uses <code>setInterval</code> or <code>requestAnimationFrame</code> to update every second.</li>
+<li>Returns a formatted object: <code>{ elapsedMs, hours, minutes, seconds }</code>.</li>
+</ul>
+</li>
+<li>Abstracting this hook keeps the timer logic testable and reusable.</li>
+</ul>
+<h3><code>src/hooks/useLocalStorage.ts</code></h3>
+<ul>
+<li>Generic hook to sync a piece of state with <code>localStorage</code>, e.g.:
+<ul>
+<li><code>const [value, setValue] = useLocalStorage&lt;T&gt;(&quot;key&quot;, defaultValue);</code></li>
+</ul>
+</li>
+<li>Can be used by <code>SessionContext</code> or directly by components if we want.</li>
+</ul>
+<h3><code>src/lib/storage.ts</code></h3>
+<ul>
+<li>Low-level helpers for <code>localStorage</code> access:
+<ul>
+<li><code>loadSessions(): Session[]</code></li>
+<li><code>saveSessions(sessions: Session[]): void</code></li>
+</ul>
+</li>
+<li>Handles JSON parsing/stringifying and fallback if <code>localStorage</code> is empty or corrupted.</li>
+</ul>
+<h3><code>src/lib/time.ts</code></h3>
+<ul>
+<li>Pure functions for time formatting:
+<ul>
+<li><code>formatDuration(ms: number): string</code> (e.g. <code>01:23:45</code>).</li>
+<li><code>formatTimeRange(start: string, end: string): string</code>.</li>
+</ul>
+</li>
+<li>Keeps formatting logic consistent across timer and cards.</li>
+</ul>
+<h3><code>src/styles/index.css</code></h3>
+<ul>
+<li>Imports Tailwind base, components, utilities:
+<ul>
+<li><code>@tailwind base; @tailwind components; @tailwind utilities;</code></li>
+</ul>
+</li>
+<li>Adds global CSS for:
+<ul>
+<li>CRT scanline effect (e.g. repeating linear gradient).</li>
+<li>Body background and font stack.</li>
+<li>Optional keyframe animations (glitch, flicker).</li>
+</ul>
+</li>
+<li>Anything too custom for Tailwind utility classes lives here.</li>
+</ul>
+
+        </main>
+    </div>
+    <footer>
+        <p>Generated by md-to-deploy</p>
+    </footer>
+</body>
+</html>
